@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบห้องสมุดสาธารณะ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        button {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+        .form-section {
+            margin-bottom: 20px;
+        }
+        .form-section h2 {
+            margin-bottom: 10px;
+        }
+        .form-section input, .form-section textarea {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <h1>ระบบห้องสมุดสาธารณะ</h1>
+
+    <!-- ส่วนแสดงรายชื่อหนังสือ -->
+    <h2>รายชื่อหนังสือ</h2>
+    <table id="bookTable">
+        <thead>
+            <tr>
+                <th>ชื่อหนังสือ</th>
+                <th>ผู้เขียน</th>
+                <th>สถานะ</th>
+                <th>การดำเนินการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- ข้อมูลหนังสือจะถูกเพิ่มโดย JavaScript -->
+        </tbody>
+    </table>
+
+    <!-- ส่วนยืม/คืนหนังสือ -->
+    <div class="form-section">
+        <h2>ยืม/คืนหนังสือ</h2>
+        <form id="bookForm">
+            <label for="bookName">ชื่อหนังสือ:</label>
+            <input type="text" id="bookName" name="bookName" required>
+            <button type="button" onclick="borrowBook()">ยืมหนังสือ</button>
+            <button type="button" onclick="returnBook()">คืนหนังสือ</button>
+        </form>
+    </div>
+
+    <!-- ส่วนสมัครสมาชิก -->
+    <div class="form-section">
+        <h2>สมัครสมาชิก</h2>
+        <form id="registerForm">
+            <label for="username">ชื่อผู้ใช้:</label>
+            <input type="text" id="username" name="username" required>
+            <label for="password">รหัสผ่าน:</label>
+            <input type="password" id="password" name="password" required>
+            <label for="email">อีเมล:</label>
+            <input type="email" id="email" name="email" required>
+            <button type="button" onclick="register()">สมัครสมาชิก</button>
+        </form>
+    </div>
+
+    <!-- ส่วนกรอกความคิดเห็น -->
+    <div class="form-section">
+        <h2>กรอกความคิดเห็น</h2>
+        <form id="commentForm">
+            <label for="comment">ความคิดเห็น:</label>
+            <textarea id="comment" name="comment" rows="4" required></textarea>
+            <button type="button" onclick="submitComment()">ส่งความคิดเห็น</button>
+        </form>
+    </div>
+
+    <!-- ส่วนแสดงความคิดเห็น -->
+    <div class="form-section">
+        <h2>ความคิดเห็นจากผู้ใช้</h2>
+        <ul id="commentList">
+            <!-- ข้อมูลความคิดเห็นจะถูกเพิ่มโดย JavaScript -->
+        </ul>
+    </div>
+
+    <script>
+        // ข้อมูลหนังสือเริ่มต้น
+        let books = [
+            { title: "Harry Potter", author: "J.K. Rowling", available: true },
+            { title: "The Great Gatsby", author: "F. Scott Fitzgerald", available: true },
+            { title: "1984", author: "George Orwell", available: false }
+        ];
+
+        // ข้อมูลสมาชิกและความคิดเห็น
+        let members = [];
+        let comments = [];
+
+        // แสดงรายชื่อหนังสือในตาราง
+        function displayBooks() {
+            const tbody = document.querySelector("#bookTable tbody");
+            tbody.innerHTML = ""; // ล้างข้อมูลเดิม
+            books.forEach((book, index) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${book.title}</td>
+                    <td>${book.author}</td>
+                    <td>${book.available ? "ว่าง" : "ถูกยืม"}</td>
+                    <td>
+                        <button onclick="toggleBookStatus(${index})">
+                            ${book.available ? "ยืม" : "คืน"}
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // ฟังก์ชันยืม/คืนหนังสือ
+        function toggleBookStatus(index) {
+            books[index].available = !books[index].available;
+            displayBooks(); // อัปเดตตาราง
+        }
+
+        // ฟังก์ชันยืมหนังสือจากฟอร์ม
+        function borrowBook() {
+            const bookName = document.getElementById("bookName").value;
+            const book = books.find(b => b.title === bookName);
+            if (book && book.available) {
+                book.available = false;
+                displayBooks();
+                alert(`คุณได้ยืมหนังสือ "${bookName}" แล้ว`);
+            } else {
+                alert("ไม่พบหนังสือหรือหนังสือถูกยืมไปแล้ว");
+            }
+        }
+
+        // ฟังก์ชันคืนหนังสือจากฟอร์ม
+        function returnBook() {
+            const bookName = document.getElementById("bookName").value;
+            const book = books.find(b => b.title === bookName);
+            if (book && !book.available) {
+                book.available = true;
+                displayBooks();
+                alert(`คุณได้คืนหนังสือ "${bookName}" แล้ว`);
+            } else {
+                alert("ไม่พบหนังสือหรือหนังสือยังไม่ถูกยืม");
+            }
+        }
+
+        // ฟังก์ชันสมัครสมาชิก
+        function register() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const email = document.getElementById("email").value;
+
+            const newMember = { username, password, email };
+            members.push(newMember);
+            alert(`สมัครสมาชิกสำเร็จ: ${username}`);
+            document.getElementById("registerForm").reset(); // ล้างฟอร์ม
+        }
+
+        // ฟังก์ชันส่งความคิดเห็น
+        function submitComment() {
+            const comment = document.getElementById("comment").value;
+            comments.push(comment);
+            displayComments(); // แสดงความคิดเห็นใหม่
+            alert("ส่งความคิดเห็นสำเร็จ");
+            document.getElementById("commentForm").reset(); // ล้างฟอร์ม
+        }
+
+        // แสดงความคิดเห็น
+        function displayComments() {
+            const commentList = document.getElementById("commentList");
+            commentList.innerHTML = ""; // ล้างข้อมูลเดิม
+            comments.forEach(comment => {
+                const li = document.createElement("li");
+                li.textContent = comment;
+                commentList.appendChild(li);
+            });
+        }
+
+        // แสดงข้อมูลหนังสือและความคิดเห็นเมื่อโหลดหน้าเว็บ
+        displayBooks();
+        displayComments();
+    </script>
+</body>
+</html>
